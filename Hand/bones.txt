@@ -1,0 +1,26 @@
+hand.R XYZ
+palm.01.R.001 YXZ
+palm.01.R XYZ
+finger_index.01.R QUATERNION
+finger_index.02.R QUATERNION
+finger_index.03.R QUATERNION
+thumb.01.R.001 QUATERNION
+thumb.01.R QUATERNION
+thumb.02.R QUATERNION
+thumb.03.R QUATERNION
+palm.02.R.001 YXZ
+palm.02.R YXZ
+finger_middle.01.R QUATERNION
+finger_middle.02.R QUATERNION
+finger_middle.03.R QUATERNION
+palm.03.R.001 YXZ
+palm.03.R YXZ
+finger_ring.01.R QUATERNION
+finger_ring.02.R QUATERNION
+finger_ring.03.R QUATERNION
+palm.04.R.001 YXZ
+palm.04.R YXZ
+finger_pinky.01.R QUATERNION
+finger_pinky.02.R QUATERNION
+finger_pinky.03.R QUATERNION
+
