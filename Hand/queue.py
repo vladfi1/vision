@@ -6,7 +6,7 @@ class ModQueue:
   
   def dequeue(self):
     c = self.counter
-    self.counter = c + 1
-    if self.counter == 0: self.counter = 0
+    self.counter += 1
+    if self.counter == self.mod: self.counter = 0
     return c
 
