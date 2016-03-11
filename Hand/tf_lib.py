@@ -1,6 +1,12 @@
 import tensorflow as tf
 import pdb
 
+def shapeSize(shape):
+  size = 1
+  for dim in shape:
+    size *= dim
+  return size
+
 def weight_variable(shape):
     '''
     Generates a TensorFlow Tensor. This Tensor gets initialized with values sampled from the truncated normal
@@ -9,6 +15,7 @@ def weight_variable(shape):
     :return: The initialized Tensor
     '''
     #pdb.set_trace()
+    #print(shapeSize(shape))
     initial = tf.truncated_normal(shape, stddev=0.1)
     return tf.Variable(initial)
 
