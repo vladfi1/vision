@@ -50,12 +50,6 @@ loss = - tf.reduce_sum(gains)
 trainGD = tf.train.GradientDescentOptimizer(0.001).minimize(loss)
 
 #print(tf.all_variables())
-
-def readPNG(filename):
-  contents = tf.read_file(filename)
-  image = tf.image.decode_png(contents)
-  return tf.image.convert_image_dtype(image, tf.float32)
-
 sess = tf.Session()
 
 directory = 'Data/Simple/'
@@ -93,10 +87,11 @@ def validate():
   
   while i < validation:
     j = min(validation, i + batch_size)
-    images = map(readPNG, validation_files[i:j])
+    images = map(imread, validation_files[i:j])
+    #images = [readPNG(f) for f in validation_files[i:j]]
     
     feed_dict = {
-      image_batch : np.array(images),
+      image_batch : np.array(list(images)),
       target_batch : np.array(validation_targets[i:j])
     }
     
@@ -112,7 +107,7 @@ sess.run(tf.initialize_all_variables())
 
 counter = 0
 while True:
-  for i in range(100):
+  for i in range(0):
     t, l = sess.run([trainGD, loss], makeBatch(train_queue, batch_size))
     print("Training loss:", 1.0 + l / batch_size)
   
