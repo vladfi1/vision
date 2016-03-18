@@ -48,7 +48,8 @@ gains = tf.mul(dot, dot) / norms
 # losses = 1 - gains
 loss = - tf.reduce_sum(gains)
 
-trainGD = tf.train.GradientDescentOptimizer(0.001).minimize(loss)
+#trainGD = tf.train.GradientDescentOptimizer(0.001).minimize(loss)
+trainRMS = tf.train.RMSPropOptimizer(0.01).minimize(loss)
 
 #print(tf.all_variables())
 sess = tf.Session()
@@ -110,7 +111,7 @@ def train():
   counter = 0
   while True:
     for i in range(500):
-      t, l = sess.run([trainGD, loss], makeBatch(train_queue, batch_size))
+      t, l = sess.run([trainRMS, loss], makeBatch(train_queue, batch_size))
       print("Training loss:", 1.0 + l / batch_size)
   
     print("Validation loss:", validate())
