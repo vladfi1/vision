@@ -38,10 +38,11 @@ conv_flat = tf.reshape(conv, [-1, flat_size])
 #conv_flat = tf.reshape(conv, [batch_size, -1])
 
 fc1 = tfl.affineLayer(conv_flat, 256, nl=tf.nn.tanh)
-fc2 = tfl.affineLayer(fc1, param_size)
+fc2 = tfl.affineLayer(fc1, param_size, nl=tf.nn.tanh)
 
 # quaternion distance
 norms = tf.reduce_sum(tf.mul(fc2, fc2), 1)
+norms = tf.clip_by_value(norms, 1e-8, 100)
 dot = tf.reduce_sum(tf.mul(fc2, target_batch), 1)
 gains = tf.mul(dot, dot) / norms
 # losses = 1 - gains
@@ -103,17 +104,17 @@ def validate():
 train_queue = ModQueue(training)
 
 saver = tf.train.Saver(tf.all_variables())
-sess.run(tf.initialize_all_variables())
+#sess.run(tf.initialize_all_variables())
 
-counter = 0
-while True:
-  for i in range(0):
-    t, l = sess.run([trainGD, loss], makeBatch(train_queue, batch_size))
-    print("Training loss:", 1.0 + l / batch_size)
+def train():
+  counter = 0
+  while True:
+    for i in range(500):
+      t, l = sess.run([trainGD, loss], makeBatch(train_queue, batch_size))
+      print("Training loss:", 1.0 + l / batch_size)
   
-  print("Validation loss:", validate())
+    print("Validation loss:", validate())
   
-  saver.save(sess, 'Saves/simple', global_step = counter)
+    saver.save(sess, 'Saves/simple', global_step = counter)
   
-  counter += 1
-  
+    counter += 1
