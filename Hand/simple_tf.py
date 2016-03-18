@@ -21,11 +21,12 @@ enqueue_op = queue.enqueue(input_data)
 
 image_batch, target_batch = queue.dequeue_many(batch_size)
 """
-image_batch = tf.placeholder(tf.float32, shape=[None, width, height, channels])
+image_batch = tf.placeholder(tf.uint8, shape=[None, width, height, channels])
+image_float = tf.cast(image_batch, tf.float32) / 255.0
 target_batch = tf.placeholder(tf.float32, shape=[None, param_size])
 
 channels = [64, 32, 16, 8]
-conv = image_batch
+conv = image_float
 for c in channels:
   conv = tfl.convLayer(conv, filter_depth=c)
 
