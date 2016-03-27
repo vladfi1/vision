@@ -75,7 +75,7 @@ def validate():
   
   validation_loss = 0.0
   
-  for i in range(validation, data_size):
+  for i in range(data_size - validation, data_size):
     validation_loss += sess.run(loss, feedDict(i))
   
   return validation_loss / validation
