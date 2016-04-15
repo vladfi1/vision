@@ -81,7 +81,7 @@ def randomizeBone(bone):
     bone.rotation_euler.z = theta
     return bone.rotation_euler
   
-  for i in range(1, 3):
+  for i in range(1, 4):
     if bone.name == 'thumb.0%d.R' % i:
       bone.rotation_mode = 'XYZ'
       theta = sampleTheta()
@@ -138,6 +138,16 @@ def genSimple(number):
   with open('params', 'wb') as params_file:
     pickle.dump(params, params_file)
 
+def genFingers(number):
+  params = []
+
+  for index in range(number):
+    params.append(randomizeScene())
+    render(index)
+
+  with open('params', 'wb') as params_file:
+    pickle.dump(params, params_file)
+
 def genTiered(count, viewpoints):
   tiers = []
   for c in range(count):
@@ -151,4 +161,6 @@ def genTiered(count, viewpoints):
   with open('params', 'wb') as params_file:
     pickle.dump(tiers, params_file)
 
-genTiered(10, 5)
+#genTiered(10, 5)
+genFingers(1000)
+
