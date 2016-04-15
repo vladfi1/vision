@@ -1,5 +1,8 @@
 import tensorflow as tf
-import pdb
+
+def readImage(image_file):
+  with tf.gfile.FastGFile(image_file, 'rb') as f:
+    return f.read()
 
 def shapeSize(shape):
   size = 1
@@ -14,8 +17,6 @@ def weight_variable(shape):
     :param shape: The dimensions of the desired Tensor
     :return: The initialized Tensor
     '''
-    #pdb.set_trace()
-    #print(shapeSize(shape))
     initial = tf.truncated_normal(shape, stddev=0.1)
     return tf.Variable(initial)
 
@@ -70,6 +71,10 @@ def convLayer(x, filter_size=5, filter_depth=64, pool_size=2):
   
   return pool
 
+def linearLayer(x, output_size):
+  W = weight_variable([x.get_shape()[-1].value, output_size])
+  return tf.matmul(x, W)
+
 def affineLayer(x, output_size, nl=None):
   W = weight_variable([x.get_shape()[-1].value, output_size])
   b = bias_variable([output_size])
@@ -77,4 +82,14 @@ def affineLayer(x, output_size, nl=None):
   fc = tf.matmul(x, W) + b
   
   return nl(fc) if nl else fc
+
+# assumes that target is normalized
+def quaternionDistance(predict, target):
+  #eps = 1e-8
+  norm = tf.reduce_sum(tf.square(predict))
+  #norm += eps
+  #norm = tf.clip_by_value(norm, 1e-8, 100)
+  dot = tf.reduce_sum(tf.mul(predict, target))
+
+  return tf.constant(1, tf.float32) - tf.square(dot) / norm
 
