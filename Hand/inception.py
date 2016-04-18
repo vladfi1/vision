@@ -49,3 +49,20 @@ def cacheFeatures(image_dir, n, ops='pool_3'):
       np.save(f, np.array(outputs))
   
   # TODO: multiple ops
+
+def cacheTiered(image_dir, count, viewpoints, ops='pool_3'):
+  if isinstance(ops, basestring):
+    hands = []
+    for c in range(count):
+      print(c)
+      cameras = []
+      for v in range(viewpoints):
+        image_file = image_dir + '%d-%d.jpeg' % (c, v)
+        cameras.append(getFeatures(image_file, ops))
+      hands.append(cameras)
+    
+    with open(image_dir + 'features', 'wb') as f:
+      np.save(f, np.array(hands))
+  
+  # TODO: multiple ops
+
