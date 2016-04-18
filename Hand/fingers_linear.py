@@ -29,6 +29,6 @@ params_separated = walkFingers(lambda finger, i: [param[finger][i] for param in 
 params_training = walkFingers(lambda finger, i: params_separated[finger][i][:training_size])
 params_validation = walkFingers(lambda finger, i: params_separated[finger][i][-validation_size:])
 
-clfs = walkFinger(lambda finger, i: LinearRegression().fit(features_training, params_training[finger][i]))
-scores = walkFinger(clfs[finger][i].score(features_validation[finger][i]))
+clfs = walkFingers(lambda finger, i: LinearRegression().fit(features_training, params_training[finger][i]))
+scores = walkFingers(lambda finger, i: clfs[finger][i].score(features_validation, params_validation[finger][i]))
 
