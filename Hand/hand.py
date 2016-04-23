@@ -130,6 +130,7 @@ def render(name):
   bpy.data.scenes['Scene'].render.filepath = '%s.jpeg' % name
   bpy.ops.render.render( write_still=True )
 
+# simple model, only one parameter, the camera pose
 def genSimple(number):
   params = []
 
@@ -140,6 +141,14 @@ def genSimple(number):
 
   with open('params', 'wb') as params_file:
     pickle.dump(params, params_file)
+
+def renderSimple(params_file):
+  with open(params_file, 'rb') as f:
+    params = pickle.load(f)
+
+  for i, q in enumerate(params):
+    setCamera(q)
+    render(i)
 
 def genFingers(number):
   params = []
@@ -165,5 +174,5 @@ def genTiered(count, viewpoints):
     pickle.dump(tiers, params_file)
 
 #genTiered(10, 5)
-genFingers(10000)
+#genFingers(10000)
 
