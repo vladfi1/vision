@@ -71,14 +71,16 @@ def feedDict(i):
     target : np.array(params[i])
   }
 
-def validate():
-  
+def validationLoss():
   validation_loss = 0.0
   
   for i in range(data_size - validation, data_size):
     validation_loss += sess.run(loss, feedDict(i))
   
   return validation_loss / validation
+
+def inferParams(indices):
+  return [sess.run(fc, feedDict(i)) for i in indices]
 
 saver = tf.train.Saver(tf.all_variables())
 
@@ -89,7 +91,7 @@ def train():
       t, l, n = sess.run([trainRMS, loss, norm], feedDict(train_queue.dequeue()))
       print(l, n)
   
-    print("Validation loss:", validate())
+    print("Validation loss:", validationLoss())
   
     saver.save(sess, 'Saves/simple_imagenet', global_step = counter)
   
