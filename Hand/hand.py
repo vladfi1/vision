@@ -34,18 +34,21 @@ def printBone(root):
 
 #printBone(handR)
 
-def randomizeCamera(params=None):
-  "Pick a random orientation to look at the hand"
+def setCamera(q):
   # default camera heading
   v = mathutils.Vector((0, 0, 1))
   v *= camera_distance
   
-  q = randomQuaternion()
   m = q.to_matrix()
   
   camera.location = handR.head + m * v
   camera.rotation_mode = 'QUATERNION'
   camera.rotation_quaternion = q
+
+def randomizeCamera(params=None):
+  "Pick a random orientation to look at the hand"
+  q = randomQuaternion()
+  setCamera(q)
   
   if params is not None:
     params['camera'] = list(q)
@@ -162,5 +165,5 @@ def genTiered(count, viewpoints):
     pickle.dump(tiers, params_file)
 
 #genTiered(10, 5)
-genFingers(1000)
+genFingers(10000)
 
