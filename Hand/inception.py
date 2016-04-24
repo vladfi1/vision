@@ -1,7 +1,7 @@
 import tensorflow as tf
 import tf_lib as tfl
 import os
-import h5py
+#import h5py
 import numpy as np
 
 with tf.gfile.FastGFile('classify_image_graph_def.pb', 'rb') as f:
@@ -26,7 +26,7 @@ def op2Tensor(op):
   return op + ':0'
 
 def getFeatures(image_file, ops='pool_3'):
-  if isinstance(ops, basestring):
+  if isinstance(ops, str):
     tensors = op2Tensor(ops)
   else: # sequence of ops
     tensors = [op2Tensor(op) for op in ops]
@@ -38,7 +38,7 @@ def writeGraph(logdir='logs/'):
   summaryWriter.flush()
 
 def cacheFeatures(image_dir, n, ops='pool_3'):
-  if isinstance(ops, basestring):
+  if isinstance(ops, str):
     outputs = []
     for i in range(n):
       print(i)
@@ -51,7 +51,7 @@ def cacheFeatures(image_dir, n, ops='pool_3'):
   # TODO: multiple ops
 
 def cacheTiered(image_dir, count, viewpoints, ops='pool_3'):
-  if isinstance(ops, basestring):
+  if isinstance(ops, str):
     hands = []
     for c in range(count):
       print(c)
