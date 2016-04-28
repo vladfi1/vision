@@ -45,9 +45,10 @@ def setCamera(q):
   camera.rotation_mode = 'QUATERNION'
   camera.rotation_quaternion = q
 
-def randomizeCamera(params=None):
+def randomizeCamera(params=None, alpha=0.0):
   "Pick a random orientation to look at the hand"
   q = randomQuaternion()
+  q = q.slerp(qid, alpha)
   setCamera(q)
   
   if params is not None:
@@ -108,8 +109,8 @@ def resetScene():
   for bone in bonesR:
     resetBone(bone)
 
-def randomizeHand(params=None):
-  if params == None:
+def randomizeHand(params=None, **kwargs):
+  if params is None:
     params = {}
 
   for bone in bonesR:
@@ -119,9 +120,9 @@ def randomizeHand(params=None):
   
   return params
 
-def randomizeScene():
-  params = randomizeHand()
-  randomizeCamera(params)
+def randomizeScene(**kwargs):
+  params = randomizeHand(**kwargs)
+  randomizeCamera(params, **kwargs)
   return params
 
 bpy.context.scene.render.image_settings.file_format = 'JPEG'
@@ -150,11 +151,11 @@ def renderSimple(params_file):
     setCamera(q)
     render(i)
 
-def genFingers(number):
+def genFingers(number, **kwargs):
   params = []
 
   for index in range(number):
-    params.append(randomizeScene())
+    params.append(randomizeScene(**kwargs))
     render(index)
 
   with open('params', 'wb') as params_file:
@@ -174,5 +175,5 @@ def genTiered(count, viewpoints):
     pickle.dump(tiers, params_file)
 
 #genTiered(10, 5)
-#genFingers(10000)
+genFingers(10000, alpha=0.5)
 
