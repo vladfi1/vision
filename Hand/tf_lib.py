@@ -1,14 +1,14 @@
 import tensorflow as tf
+import functools
+import operator
+import math
 
 def readImage(image_file):
   with tf.gfile.FastGFile(image_file, 'rb') as f:
     return f.read()
 
-def shapeSize(shape):
-  size = 1
-  for dim in shape:
-    size *= dim
-  return size
+def product(xs):
+  return functools.reduce(operator.mul, product, 1.0)
 
 def weight_variable(shape):
     '''
@@ -17,7 +17,9 @@ def weight_variable(shape):
     :param shape: The dimensions of the desired Tensor
     :return: The initialized Tensor
     '''
-    initial = tf.truncated_normal(shape, stddev=0.1)
+    #initial = tf.truncated_normal(shape, stddev=0.1)
+    input_size = product(shape[:-1])
+    initial = tf.truncated_normal(shape, stddev=1.0/math.sqrt(input_size))
     return tf.Variable(initial)
 
 def bias_variable(shape):
@@ -27,7 +29,8 @@ def bias_variable(shape):
     :param shape: The dimensions of the desired Tensor
     :return: The initialized Tensor
     '''
-    initial = tf.constant(0.1, shape=shape)
+    size = 1.0 / math.sqrt(product(shape))
+    initial = tf.random_uniform(shape, -size, size)
     return tf.Variable(initial)
 
 def conv2d(x, W):
