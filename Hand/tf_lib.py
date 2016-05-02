@@ -3,6 +3,9 @@ import functools
 import operator
 import math
 
+def leaky_relu(x, alpha=0.01):
+  return tf.maximum(alpha * x, x)
+
 def readImage(image_file):
   with tf.gfile.FastGFile(image_file, 'rb') as f:
     return f.read()
@@ -20,7 +23,7 @@ def weight_variable(shape):
     #initial = tf.truncated_normal(shape, stddev=0.1)
     input_size = product(shape[:-1])
     initial = tf.truncated_normal(shape, stddev=1.0/math.sqrt(input_size))
-    return tf.Variable(initial)
+    return tf.Variable(initial, 'weight')
 
 def bias_variable(shape):
     '''
@@ -31,7 +34,7 @@ def bias_variable(shape):
     '''
     size = 1.0 / math.sqrt(product(shape))
     initial = tf.random_uniform(shape, -size, size)
-    return tf.Variable(initial)
+    return tf.Variable(initial, 'bias')
 
 def conv2d(x, W):
     '''
@@ -65,9 +68,8 @@ def convLayer(x, filter_size=5, filter_depth=64, pool_size=2):
   conv = tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
   
   b = bias_variable([filter_depth])
-  relu = tf.nn.relu(conv + b)
   
-  pool = tf.nn.max_pool(relu,
+  pool = tf.nn.max_pool(leaky_relu(conv+b),
                         ksize=[1,pool_size,pool_size,1],
                         strides=[1,pool_size,pool_size,1],
                         padding = 'SAME')
