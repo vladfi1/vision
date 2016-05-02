@@ -1,7 +1,7 @@
 import tensorflow as tf
 import tf_lib as tfl
 import os
-import h5py
+#import h5py
 import numpy as np
 
 with tf.gfile.FastGFile('classify_image_graph_def.pb', 'rb') as f:
