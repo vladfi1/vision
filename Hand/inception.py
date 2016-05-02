@@ -25,8 +25,11 @@ def op2Tensor(op):
   "Assumes that operations have one output."
   return op + ':0'
 
+def getTensor(op):
+  return sess.graph.get_tensor_by_name(op2Tensor(op))
+
 def getFeatures(image_file, ops='pool_3'):
-  if isinstance(ops, basestring):
+  if isinstance(ops, str):
     tensors = op2Tensor(ops)
   else: # sequence of ops
     tensors = [op2Tensor(op) for op in ops]
@@ -38,20 +41,23 @@ def writeGraph(logdir='logs/'):
   summaryWriter.flush()
 
 def cacheFeatures(image_dir, n, ops='pool_3'):
-  if isinstance(ops, basestring):
-    outputs = []
-    for i in range(n):
-      print(i)
-      image_file = image_dir + str(i) + '.jpeg'
-      outputs.append(getFeatures(image_file, ops))
-    
-    with open(image_dir + 'features', 'wb') as f:
-      np.save(f, np.array(outputs))
+  if isinstance(ops, str):
+    ops = [ops]
   
-  # TODO: multiple ops
-
+  outputs = []
+  for i in range(n):
+    print(i)
+    image_file = image_dir + str(i) + '.jpeg'
+    outputs.append(getFeatures(image_file, ops))
+  
+  outputs = list(zip(*outputs))
+  
+  for op, output in zip(ops, outputs):
+    with open(image_dir + op, 'wb') as f:
+      np.save(f, np.array(output))
+  
 def cacheTiered(image_dir, count, viewpoints, ops='pool_3'):
-  if isinstance(ops, basestring):
+  if isinstance(ops, str):
     hands = []
     for c in range(count):
       print(c)
