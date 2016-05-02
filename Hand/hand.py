@@ -1,18 +1,21 @@
 import bpy
-import numpy
+from numpy import random
 import mathutils
 import pickle
+import math
 
 # identity quaternion
 qid = mathutils.Quaternion((1, 0, 0, 0))
 
 def randomQuaternion():
-  q = mathutils.Quaternion(numpy.random.randn(4))
+  q = mathutils.Quaternion(random.randn(4))
   q.normalize()
 
   return q
 
-camera_distance = 0.4
+def sampleTheta():
+  return random.beta(1, 4)
+
 camera = bpy.context.scene.camera
 
 #print(bpy.data.objects.items())
@@ -34,7 +37,7 @@ def printBone(root):
 
 #printBone(handR)
 
-def setCamera(q):
+def setCameraQ(q, camera_distance = 0.4):
   # default camera heading
   v = mathutils.Vector((0, 0, 1))
   v *= camera_distance
@@ -45,16 +48,85 @@ def setCamera(q):
   camera.rotation_mode = 'QUATERNION'
   camera.rotation_quaternion = q
 
-def randomizeCamera(params=None, alpha=0.0):
-  "Pick a random orientation to look at the hand"
-  q = randomQuaternion()
-  q = q.slerp(qid, alpha)
-  setCamera(q)
+def randomCameraOrientation():
+  x = random.uniform(-1, 1)
+  y = random.uniform(-1, 1)
+  z = random.uniform(-1, 1)
+  return [x, y, z]
+
+def randomCameraOffset():
+  z = random.uniform(0.4, 1.0)
+  x = z * random.uniform(-0.3, 0.3)
+  y = z * random.uniform(-0.3, 0.3)
+  return [x, y, z]
+
+def randomCamera():
+  return {
+    'rotation' : randomCameraOrientation(),
+    'offset' : randomCameraOffset(),
+  }
+
+# use this orientation to face the hand
+face_hand = mathutils.Euler((math.pi/2, 0, math.pi/2))
+
+def setCamera(camera_params):
+  v = mathutils.Vector(camera_params['offset'])
+  camera.rotation_mode = 'XYZ'
+  camera.rotation_euler = face_hand
+  camera.rotation_euler.rotate(mathutils.Euler(camera_params['rotation']))
+  camera.location = handR.head + camera.rotation_euler.to_matrix() * v
+
+def randomFingerJoint(i):
+  theta = sampleTheta()
   
-  if params is not None:
-    params['camera'] = list(q)
+  x = theta
+  y = random.normal(0, 0.03)
+  z = theta
   
-  return list(q)
+  return [x, y, z]
+
+def randomThumbJoint(i):
+  theta = sampleTheta()
+  x = theta
+  y = 0.0
+  z = -theta if i == 1 else 0.0
+  
+  return [x, y, z]
+
+def randomThumbJoint001():
+  theta = sampleTheta()
+  x = -theta
+  
+  return [x, 0.0, 0.0]
+
+def randomFingers():
+  fingers = {}
+  fingers['thumb.01.R.001'] = randomThumbJoint001()
+  
+  for i in [1, 2, 3]:
+    fingers['thumb.0%d.R' % i] = randomThumbJoint(i)
+
+  for finger in ['index', 'middle', 'ring', 'pinky']:
+    for i in [1, 2, 3]:
+      fingers['finger_%s.0%d.R' % (finger, i)] = randomFingerJoint(i)
+  
+  return fingers
+
+def setFingers(fingers):
+  for finger, rotation_euler in fingers.items():
+    bone = bones[finger]
+    bone.rotation_mode = 'XYZ'
+    bone.rotation_euler = rotation_euler
+
+def randomScene():
+  return {
+    'camera' : randomCamera(),
+    'fingers' : randomFingers(),
+  }
+
+def setScene(scene):
+  setCamera(scene['camera'])
+  setFingers(scene['fingers'])
 
 def resetBone(bone):
   if bone.rotation_mode == 'QUATERNION':
@@ -62,68 +134,9 @@ def resetBone(bone):
   else:
     bone.rotation_euler.zero()
 
-def sampleTheta():
-  return numpy.random.beta(1, 4)
-
-def randomizeBone(bone):
-  #bone.rotation_mode = 'QUATERNION'
-  #bone.rotation_mode = 'XYZ'
-  
-  """
-  if bone.rotation_mode == 'QUATERNION':
-    q = randomQuaternion().slerp(qid, 0.85)
-    bone.rotation_quaternion = q
-    return q
-  """
-  
-  if bone.name.startswith('finger'):
-    bone.rotation_mode = 'XYZ'
-    theta = sampleTheta()
-    
-    bone.rotation_euler.x = theta
-    bone.rotation_euler.y = numpy.random.normal(0, 0.03)
-    bone.rotation_euler.z = theta
-    return bone.rotation_euler
-  
-  for i in range(1, 4):
-    if bone.name == 'thumb.0%d.R' % i:
-      bone.rotation_mode = 'XYZ'
-      theta = sampleTheta()
-      bone.rotation_euler.x = theta
-      
-      if i == 1:
-        bone.rotation_euler.z = -theta
-    
-      return bone.rotation_euler
-  
-  if bone.name == 'thumb.01.R.001':
-    bone.rotation_mode = 'XYZ'
-    theta = sampleTheta()
-    bone.rotation_euler.x = -theta
-    
-    return bone.rotation_euler
-  
-  return None
-
 def resetScene():
   for bone in bonesR:
     resetBone(bone)
-
-def randomizeHand(params=None, **kwargs):
-  if params is None:
-    params = {}
-
-  for bone in bonesR:
-    theta = randomizeBone(bone)
-    if theta is not None:
-      params[bone.name] = list(theta)
-  
-  return params
-
-def randomizeScene(**kwargs):
-  params = randomizeHand(**kwargs)
-  randomizeCamera(params, **kwargs)
-  return params
 
 bpy.context.scene.render.image_settings.file_format = 'JPEG'
 
@@ -147,15 +160,17 @@ def renderSimple(params_file):
   with open(params_file, 'rb') as f:
     params = pickle.load(f)
 
-  for i, q in enumerate(params):
-    setCamera(q)
+  for i, c in enumerate(params):
+    setCamera(c)
     render(i)
 
-def genFingers(number, **kwargs):
+def genFingers(number):
   params = []
 
   for index in range(number):
-    params.append(randomizeScene(**kwargs))
+    scene = randomScene()
+    params.append(scene)
+    setScene(scene)
     render(index)
 
   with open('params', 'wb') as params_file:
@@ -175,5 +190,5 @@ def genTiered(count, viewpoints):
     pickle.dump(tiers, params_file)
 
 #genTiered(10, 5)
-genFingers(10000, alpha=0.5)
+genFingers(10000)
 
