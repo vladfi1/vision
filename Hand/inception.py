@@ -28,6 +28,9 @@ def op2Tensor(op):
 def getTensor(op):
   return sess.graph.get_tensor_by_name(op2Tensor(op))
 
+def getShape(op):
+  return tfl.squeeze_shape([dim.value for dim in getTensor(op).get_shape()])
+
 def getFeatures(image_file, ops='pool_3'):
   if isinstance(ops, str):
     tensors = op2Tensor(ops)
@@ -44,18 +47,18 @@ def cacheFeatures(image_dir, n, ops='pool_3'):
   if isinstance(ops, str):
     ops = [ops]
   
-  outputs = []
+  files = [np.memmap(filename=image_dir + op, mode='w+', dtype=np.float32, shape=tuple([n]+getShape(op))) for op in ops]
+  
   for i in range(n):
     print(i)
     image_file = image_dir + str(i) + '.jpeg'
-    outputs.append(getFeatures(image_file, ops))
-  
-  outputs = list(zip(*outputs))
-  
-  for op, output in zip(ops, outputs):
-    with open(image_dir + op, 'wb') as f:
-      np.save(f, np.array(output))
-  
+    output = getFeatures(image_file, ops)
+    for f, x in zip(files, output):
+      f[i] = np.squeeze(x)
+
+def loadFeatures(path, n, op):
+  return np.memmap(filename=path+op, mode='r', dtype=np.float32, shape=tuple([n]+getShape(op)))
+
 def cacheTiered(image_dir, count, viewpoints, ops='pool_3'):
   if isinstance(ops, str):
     hands = []
