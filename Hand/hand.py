@@ -38,9 +38,11 @@ def printBone(root):
 #printBone(handR)
 
 def setCameraQ(q, camera_distance = 0.4):
+  q = mathutils.Quaternion(q)
+  q.normalize()
+  
   # default camera heading
-  v = mathutils.Vector((0, 0, 1))
-  v *= camera_distance
+  v = mathutils.Vector((0, 0, camera_distance))
   
   m = q.to_matrix()
   
@@ -112,11 +114,14 @@ def randomFingers():
   
   return fingers
 
+def setFinger(name, value):
+  bone = bones[name]
+  bone.rotation_mode = 'XYZ'
+  bone.rotation_euler = value
+
 def setFingers(fingers):
-  for finger, rotation_euler in fingers.items():
-    bone = bones[finger]
-    bone.rotation_mode = 'XYZ'
-    bone.rotation_euler = rotation_euler
+  for name, value in fingers.items():
+    setFinger(name, value)
 
 def randomScene():
   return {
@@ -127,6 +132,13 @@ def randomScene():
 def setScene(scene):
   setCamera(scene['camera'])
   setFingers(scene['fingers'])
+
+def setScene2(scene):
+  for name, value in scene.items():
+    if name == 'camera':
+      setCameraQ(value)
+    else:
+      setFinger(name, value)
 
 def resetBone(bone):
   if bone.rotation_mode == 'QUATERNION':
@@ -164,7 +176,7 @@ def renderSimple(params_file):
     setCamera(c)
     render(i)
 
-def genFingers(number):
+def genScene(number):
   params = []
 
   for index in range(number):
@@ -175,6 +187,22 @@ def genFingers(number):
 
   with open('params', 'wb') as params_file:
     pickle.dump(params, params_file)
+
+def renderScene(params_file, name='%d'):
+  with open(params_file, 'rb') as f:
+    params = pickle.load(f)
+
+  for i, s in enumerate(params):
+    setScene(s)
+    render(name % i)
+
+def renderScene2(params_file, name='%d'):
+  with open(params_file, 'rb') as f:
+    params = pickle.load(f)
+
+  for i, s in enumerate(params):
+    setScene2(s)
+    render(name % i)
 
 def genTiered(count, viewpoints):
   tiers = []
@@ -190,5 +218,8 @@ def genTiered(count, viewpoints):
     pickle.dump(tiers, params_file)
 
 #genTiered(10, 5)
-genFingers(10000)
+#genFingers(10000)
+
+#renderScene2('params')
+renderScene2('predict', name='%d-predict')
 
