@@ -3,6 +3,13 @@ import functools
 import operator
 import math
 
+def squeeze_shape(shape):
+  return list(filter(lambda x: x != 1, shape))
+
+def flatten(x):
+  size = product([dim.value for dim in x.get_shape()[1:]])
+  return tf.reshape(x, [-1, size])
+
 def leaky_relu(x, alpha=0.01):
   return tf.maximum(alpha * x, x)
 
@@ -11,7 +18,7 @@ def readImage(image_file):
     return f.read()
 
 def product(xs):
-  return functools.reduce(operator.mul, product, 1.0)
+  return functools.reduce(operator.mul, xs, 1)
 
 def weight_variable(shape):
     '''
@@ -90,11 +97,11 @@ def affineLayer(x, output_size, nl=None):
 
 # assumes that target is normalized
 def quaternionDistance(predict, target):
-  #eps = 1e-8
-  norm = tf.reduce_sum(tf.square(predict))
-  #norm += eps
+  eps = 1e-8
+  norm = tf.reduce_sum(tf.square(predict), 1)
+  norm += eps
   #norm = tf.clip_by_value(norm, 1e-8, 100)
-  dot = tf.reduce_sum(tf.mul(predict, target))
+  dot = tf.reduce_sum(tf.mul(predict, target), 1)
 
   return tf.constant(1, tf.float32) - tf.square(dot) / norm
 
