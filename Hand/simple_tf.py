@@ -41,6 +41,10 @@ conv_flat = tf.reshape(conv, [-1, flat_size])
 fc1 = tfl.affineLayer(conv_flat, 256, nl=tf.nn.tanh)
 fc2 = tfl.affineLayer(fc1, param_size, nl=tf.nn.tanh)
 
+
+#def qDist(estimate, target):
+#  "Quaternion distance. Assumes target is normalized."
+
 # quaternion distance
 norms = tf.reduce_sum(tf.mul(fc2, fc2), 1)
 norms = tf.clip_by_value(norms, 1e-8, 100)
