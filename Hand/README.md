@@ -14,3 +14,15 @@ Test/inferred hands:
 ![Test 3](Test/3.jpeg)
 ![Predict 3](Test/3-predict.jpeg)
 
+![Test 4](Test/4.jpeg)
+![Predict 4](Test/4-predict.jpeg)
+
+![Test 5](Test/5.jpeg)
+![Predict 5](Test/5-predict.jpeg)
+
+![Test 6](Test/6.jpeg)
+![Predict 6](Test/6-predict.jpeg)
+
+![Test 7](Test/7.jpeg)
+![Predict 7](Test/7-predict.jpeg)
+
